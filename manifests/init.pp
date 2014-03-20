@@ -19,6 +19,7 @@ class nfs (
   case $::osfamily {
     'Debian': {
 
+## REQUIRES ghoneycutt/rcpbind
       include rpcbind
 
       $default_nfs_package = 'nfs-common'
@@ -46,6 +47,8 @@ class nfs (
           $default_nfs_package = 'nfs-utils'
         }
         '6': {
+
+## REQUIRES ghoneycutt/rcpbind
           include rpcbind
 
           $default_nfs_package =  'nfs-utils'
@@ -107,6 +110,7 @@ class nfs (
 
   if $nfs_service_real {
     service { 'nfs_service':
+## ERROR ON SUSE: nfs service should ouly be enbled, not running
       ensure    => running,
       name      => $nfs_service_real,
       enable    => true,
@@ -114,6 +118,7 @@ class nfs (
     }
   }
 
+  
   if $mounts != undef {
 
     if $hiera_hash_real == true {
@@ -124,6 +129,7 @@ class nfs (
     }
 
     validate_hash($mounts_real)
-    create_resources('types::mount',$mounts_real)
+## REQUIRES ghoneycutt/types
+    #create_resources('types::mount',$mounts_real)
   }
 }

@@ -19,10 +19,10 @@ class nfs (
   case $::osfamily {
     'Debian': {
 
-## REQUIRES ghoneycutt/rcpbind
       include rpcbind
 
       $default_nfs_package = 'nfs-common'
+      $nfs_service_ensure  = 'running'
 
       case $::lsbdistid {
         'Debian': {
@@ -41,6 +41,7 @@ class nfs (
       include nfs::idmap
 
       $default_nfs_service = 'nfs'
+      $nfs_service_ensure  = 'running'
 
       case $::lsbmajdistrelease {
         '5': {
@@ -48,7 +49,6 @@ class nfs (
         }
         '6': {
 
-## REQUIRES ghoneycutt/rcpbind
           include rpcbind
 
           $default_nfs_package =  'nfs-utils'
@@ -67,17 +67,22 @@ class nfs (
                               'SUNWnfssu']
 
       $default_nfs_service = 'nfs/client'
+      $nfs_service_ensure  = 'running'
     }
     'Suse' : {
 
       include nfs::idmap
 
+      $nfs_service_ensure = undef
+
       case $::lsbmajdistrelease {
         '10': {
+          #include portmap
           $default_nfs_package = 'nfs-utils'
           $default_nfs_service = 'nfs'
         }
         '11': {
+          include rpcbind
           $default_nfs_package = 'nfs-client'
           $default_nfs_service = 'nfs'
         }
@@ -110,8 +115,7 @@ class nfs (
 
   if $nfs_service_real {
     service { 'nfs_service':
-## ERROR ON SUSE: nfs service should ouly be enbled, not running
-      ensure    => running,
+      ensure    => $nfs_service_ensure,
       name      => $nfs_service_real,
       enable    => true,
       subscribe => Package[$nfs_package_real],

@@ -8,7 +8,7 @@ class nfs::idmap (
   $idmapd_conf_owner         = 'root',
   $idmapd_conf_group         = 'root',
   $idmapd_conf_mode          = '0644',
-  $idmapd_service_name       = 'rpcidmapd',
+  $idmapd_service_name       = 'USE_DEFAULTS',
   $idmapd_service_enable     = true,
   $idmapd_service_hasstatus  = true,
   $idmapd_service_hasrestart = true,
@@ -81,16 +81,31 @@ class nfs::idmap (
 
   case $::osfamily {
     'RedHat' : {
-      $default_idmap_package    = 'nfs-utils-lib'
-      $default_pipefs_directory = 'UNSET'
+      $default_idmapd_service_name = 'rpcidmapd'
+      $default_idmap_package       = 'nfs-utils-lib'
+      $default_pipefs_directory    = 'UNSET'
     }
     'Suse' : {
       $default_idmap_package    = 'nfsidmap'
       $default_pipefs_directory = '/var/lib/nfs/rpc_pipefs'
+      case $::lsbmajdistrelease {
+        '10': {
+      $default_idmapd_service_name = 'idmapd'
+        }
+        '11': {
+      $default_idmapd_service_name = undef
+        }
+      }
     }
     default: {
       fail( "idmap only supports RedHat and Suse osfamilies, not ${::osfamily}" )
     }
+  }
+
+  if $idmapd_service_name == 'USE_DEFAULTS' {
+    $idmapd_service_name_real = $default_idmapd_service_name
+  } else {
+    $idmapd_service_name_real = $idmapd_service_name
   }
 
   if $idmap_package == 'USE_DEFAULTS' {
@@ -116,18 +131,18 @@ class nfs::idmap (
   file { 'idmapd_conf':
     ensure  => file,
     path    => $idmapd_conf_path,
-    content => template('nfs/idmapd.conf.erb'),
+    content => template("nfs/idmapd.conf.${::osfamily}.erb"),
     owner   => $idmapd_conf_owner,
     group   => $idmapd_conf_group,
     mode    => $idmapd_conf_mode,
     require => Package[$idmap_package_real],
   }
 
-  if $::osfamily == 'RedHat' {
+  if $idmapd_service_name_real != undef {
 
     service { 'idmapd_service':
       ensure     => running,
-      name       => $idmapd_service_name,
+      name       => $idmapd_service_name_real,
       enable     => $idmapd_service_enable,
       hasstatus  => $idmapd_service_hasstatus,
       hasrestart => $idmapd_service_hasrestart,

@@ -3,12 +3,25 @@
 # Manages NFS
 #
 class nfs (
-  $hiera_hash  = false,
-  $nfs_package = 'USE_DEFAULTS',
-  $nfs_service = 'USE_DEFAULTS',
-  $mounts      = undef,
-) {
+  $supporting_class      = $nfs::params::supporting_class,
+  $nfs_client_package    = $nfs::params::nfs_client_package,
+  $nfs_client_service    = $nfs::params::nfs_client_service,
+  $nfs_server_package    = $nfs::params::nfs_server_package,
+  $nfs_server_service    = $nfs::params::nfs_server_service,
+  $client_service_ensure = $nfs::params::client_service_ensure,
+  $client_service_enable = true,
+  $hiera_hash            = false,
+  $mounts                = undef,
+) inherits nfs::params {
 
+
+  # include required supporting classes
+  if $supporting_class != undef {
+    include $supporting_class
+  }
+
+
+  # validate $hiera_hash boolean
   if type($hiera_hash) == 'string' {
     $hiera_hash_real = str2bool($hiera_hash)
   } else {
@@ -16,113 +29,25 @@ class nfs (
   }
   validate_bool($hiera_hash_real)
 
-  case $::osfamily {
-    'Debian': {
 
-      include rpcbind
-
-      $default_nfs_package = 'nfs-common'
-      $nfs_service_ensure  = 'running'
-
-      case $::lsbdistid {
-        'Debian': {
-          $default_nfs_service = 'nfs-common'
-        }
-        'Ubuntu': {
-          $default_nfs_service = undef
-        }
-        default: {
-          fail("nfs module only supports lsbdistid Debian and Ubuntu of osfamily Debian. Detected lsbdistid is <${::lsbdistid}>.")
-        }
-      }
-    }
-    'RedHat': {
-
-      include nfs::idmap
-
-      $default_nfs_service = 'nfs'
-      $nfs_service_ensure  = 'running'
-
-      case $::lsbmajdistrelease {
-        '5': {
-          $default_nfs_package = 'nfs-utils'
-        }
-        '6': {
-
-          include rpcbind
-
-          $default_nfs_package =  'nfs-utils'
-        }
-        default: {
-          fail("nfs module only supports EL 5 and 6 and lsbmajdistrelease was detected as <${::lsbmajdistrelease}>.")
-        }
-      }
-    }
-    'Solaris': {
-      $default_nfs_package = ['SUNWnfsckr',
-                              'SUNWnfscr',
-                              'SUNWnfscu',
-                              'SUNWnfsskr',
-                              'SUNWnfssr',
-                              'SUNWnfssu']
-
-      $default_nfs_service = 'nfs/client'
-      $nfs_service_ensure  = 'running'
-    }
-    'Suse' : {
-
-      include nfs::idmap
-
-      $nfs_service_ensure = undef
-
-      case $::lsbmajdistrelease {
-        '10': {
-          #include portmap
-          $default_nfs_package = 'nfs-utils'
-          $default_nfs_service = 'nfs'
-        }
-        '11': {
-          include rpcbind
-          $default_nfs_package = 'nfs-client'
-          $default_nfs_service = 'nfs'
-        }
-        default: {
-          fail("nfs module only supports Suse 10 and 11 and lsbmajdistrelease was detected as <${::lsbmajdistrelease}>.")
-        }
-      }
-    }
-
-    default: {
-      fail("nfs module only supports osfamilies Debian, RedHat, Solaris and Suse, and <${::osfamily}> was detected.")
-    }
-  }
-
-  if $nfs_package == 'USE_DEFAULTS' {
-    $nfs_package_real = $default_nfs_package
-  } else {
-    $nfs_package_real = $nfs_package
-  }
-
-  if $nfs_service == 'USE_DEFAULTS' {
-    $nfs_service_real = $default_nfs_service
-  } else {
-    $nfs_service_real = $nfs_service
-  }
-
-  package { $nfs_package_real:
+  # install client packages
+  package { $nfs_client_package:
     ensure => present,
   }
 
-  if $nfs_service_real {
-    service { 'nfs_service':
-      ensure    => $nfs_service_ensure,
-      name      => $nfs_service_real,
-      enable    => true,
-      subscribe => Package[$nfs_package_real],
+
+  # manage client service
+  if $nfs_client_service {
+    service { 'nfs_client_service':
+      ensure    => $nfs_client_service_ensure,
+      name      => $nfs_client_service,
+      enable    => $enable,
+      subscribe => Package[$nfs_client_package],
     }
   }
 
   
+  # create nfs mounts either from hiera_hash call or from $mounts param
   if $mounts != undef {
 
     if $hiera_hash_real == true {
@@ -133,7 +58,7 @@ class nfs (
     }
 
     validate_hash($mounts_real)
-## REQUIRES ghoneycutt/types
-    #create_resources('types::mount',$mounts_real)
+    create_resources('nfs::mount',$mounts_real)
   }
+
 }

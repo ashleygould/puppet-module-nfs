@@ -1,0 +1,17 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+#
+[General]
+
+Verbosity = <%= @verbosity %>
+<% if @pipefs_directory_real != 'UNSET' -%>
+Pipefs-Directory = /var/lib/nfs/rpc_pipefs
+<% end %>
+<% if @idmap_domain != 'UNSET' -%>
+Domain = <%= @idmap_domain %>
+<% end %>
+
+[Mapping]
+
+Nobody-User = <%= @nobody_user %>
+Nobody-Group = <%= @nobody_group %>

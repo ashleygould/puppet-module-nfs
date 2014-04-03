@@ -39,7 +39,7 @@ class nfs (
   # manage client service
   if $nfs_client_service {
     service { 'nfs_client_service':
-      ensure    => $nfs_client_service_ensure,
+      ensure    => $client_service_ensure,
       name      => $nfs_client_service,
       enable    => $enable,
       subscribe => Package[$nfs_client_package],

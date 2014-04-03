@@ -1,0 +1,17 @@
+DONE nfs3 support
+spec rpc ports in /etc/sysconfig/nfs for nfs3
+firewall configs
+fix param names in all classes: nfs_client_package -> client_package 
+DONE manage bind mounts
+understand export and mount options better
+puppetdoc classes and defines
+decide how to manage this module: r10k?
+send ghoneycutt my new version ?
+
+implementation plan
+set up ad zones properly for nfs servers:
+  aigwebp01
+  doundoun
+  newo
+  uasbatp01
+  filenet servers

@@ -10,13 +10,20 @@ define nfs::mount (
   $pass     = undef,
 ) {
 
-  $mountpoint = $name
+  require 'nfs'
 
-  nfs::mkdir_p { $mountpoint: }
+  $mountpoint        = $name
+  $ensure_mountpoint = $ensure ? {
+    'absent' => $ensure,
+    default  => 'present',
+  }
+  nfs::mkdir_p { $mountpoint:
+    ensure => $ensure_mountpoint,
+  }
 
   mount { $mountpoint:
     ensure   => $ensure,
-    device   => "${server}:/${share}",
+    device   => "${server}:${share}",
     fstype   => $fstype,
     atboot   => $atboot,
     options  => $options,

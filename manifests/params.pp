@@ -8,16 +8,16 @@ class nfs::params {
     'Debian': {
       $supporting_class      = 'rpcbind'
       $client_service_ensure = 'running'
-      $nfs_client_package    = 'nfs-common'
-      $nfs_server_package    = undef
-      $nfs_server_service    = undef
+      $client_package    = 'nfs-common'
+      $server_package    = undef
+      $server_service    = undef
 
       case $::lsbdistid {
         'Debian': {
-          $nfs_client_service = 'nfs-common'
+          $client_service = 'nfs-common'
         }
         'Ubuntu': {
-          $nfs_client_service = undef
+          $client_service = undef
         }
         default: {
           fail("nfs module only supports lsbdistid Debian and Ubuntu of osfamily Debian. Detected lsbdistid is <${::lsbdistid}>.")
@@ -27,10 +27,10 @@ class nfs::params {
 
     'RedHat': {
       $client_service_ensure = 'running'
-      $nfs_client_service    = 'nfs'
-      $nfs_client_package    = 'nfs-utils'
-      $nfs_server_service    = undef
-      $nfs_server_package    = undef
+      $client_service    = 'nfs'
+      $client_package    = 'nfs-utils'
+      $server_service    = undef
+      $server_package    = undef
 
       case $::lsbmajdistrelease {
         '5': {
@@ -47,20 +47,20 @@ class nfs::params {
 
     'Suse' : {
       $client_service_ensure = undef
-      $nfs_client_service    = 'nfs'
-      $nfs_server_service    = 'nfsserver'
+      $client_service    = 'nfs'
+      $server_service    = 'nfsserver'
 
       case $::lsbmajdistrelease {
         '10': {
           $supporting_class   = 'nfs::idmap'
           #$supporting_class   = ['nfs::idmap', 'portmap']
-          $nfs_client_package = 'nfs-utils'
-          $nfs_server_package = undef
+          $client_package = 'nfs-utils'
+          $server_package = undef
         }
         '11': {
           $supporting_class   = ['nfs::idmap', 'rpcbind']
-          $nfs_client_package = 'nfs-client'
-          $nfs_server_package = 'nfs-kernel-server'
+          $client_package = 'nfs-client'
+          $server_package = 'nfs-kernel-server'
         }
         default: {
           fail("nfs module only supports Suse 10 and 11 and lsbmajdistrelease was detected as <${::lsbmajdistrelease}>.")

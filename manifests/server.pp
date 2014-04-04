@@ -13,8 +13,8 @@ class nfs::server (
 
   include 'nfs'
 
-  if $nfs::nfs_server_package != undef {
-    package { $nfs::nfs_server_package:
+  if $nfs::server_package != undef {
+    package { $nfs::server_package:
       ensure  => installed,
       require => Class['nfs'],
     }
@@ -48,11 +48,11 @@ class nfs::server (
   }
 
 
-  if $nfs::nfs_server_service != undef {
-    service { $nfs::nfs_server_service:
+  if $nfs::server_service != undef {
+    service { $nfs::server_service:
       ensure    => $ensure,
       enable    => $enable,
-      require    => Class['nfs'],
+      require   => Class['nfs'],
     }
   } else {
     Service <| $title == 'nfs_client_service' |> {

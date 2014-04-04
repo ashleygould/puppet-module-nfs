@@ -4,10 +4,10 @@
 #
 class nfs (
   $supporting_class      = $nfs::params::supporting_class,
-  $nfs_client_package    = $nfs::params::nfs_client_package,
-  $nfs_client_service    = $nfs::params::nfs_client_service,
-  $nfs_server_package    = $nfs::params::nfs_server_package,
-  $nfs_server_service    = $nfs::params::nfs_server_service,
+  $client_package        = $nfs::params::client_package,
+  $client_service        = $nfs::params::client_service,
+  $server_package        = $nfs::params::server_package,
+  $server_service        = $nfs::params::server_service,
   $client_service_ensure = $nfs::params::client_service_ensure,
   $client_service_enable = true,
   $hiera_hash            = false,
@@ -31,18 +31,18 @@ class nfs (
 
 
   # install client packages
-  package { $nfs_client_package:
+  package { $client_package:
     ensure => present,
   }
 
 
   # manage client service
-  if $nfs_client_service {
+  if $client_service {
     service { 'nfs_client_service':
       ensure    => $client_service_ensure,
-      name      => $nfs_client_service,
+      name      => $client_service,
       enable    => $enable,
-      subscribe => Package[$nfs_client_package],
+      subscribe => Package[$client_package],
     }
   }
 

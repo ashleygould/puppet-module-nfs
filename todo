@@ -1,7 +1,7 @@
 DONE nfs3 support
-spec rpc ports in /etc/sysconfig/nfs for nfs3
+DONE spec rpc ports in /etc/sysconfig/nfs for nfs3
 firewall configs
-fix param names in all classes: nfs_client_package -> client_package 
+DONE fix param names in all classes: nfs_client_package -> client_package 
 DONE manage bind mounts
 DONE understand export and mount options better
 puppetdoc classes and defines

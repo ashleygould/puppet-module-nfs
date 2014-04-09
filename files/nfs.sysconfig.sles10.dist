@@ -1,0 +1,55 @@
+## Path:		Network/File systems/NFS server
+## Description:		number of threads for kernel nfs server
+## Type:		integer
+## Default:		4
+## ServiceRestart:	nfsserver
+#
+# the kernel nfs-server supports multiple server threads
+#
+USE_KERNEL_NFSD_NUMBER="4"
+
+## Path:		Network/File systems/NFS server
+## Description:		use fixed port number for mountd
+## Type:		integer
+## Default:		""
+## ServiceRestart:	nfsserver
+#
+#  Only set this if you want to start mountd on a fixed
+#  port instead of the port assigned by rpc. Only for use
+#  to export nfs-filesystems through firewalls.
+#
+MOUNTD_PORT=""
+
+## Path:                Network/File systems/NFS server
+## Description:         GSS security for NFS
+## Type:                yesno
+## Default:             yes
+## ServiceRestart:      gssd
+#
+# Enable RPCSEC_GSS security for NFS (yes/no)
+#
+NFS_SECURITY_GSS="no"
+
+## Path:                Network/File systems/NFS server
+## Description:         NFSv4 protocol support
+## Type:                yesno
+## Default:             yes
+## ServiceRestart:      idmapd
+#
+# Enable NFSv4 support (yes/no)
+#
+NFS4_SUPPORT="yes"
+
+## Path:                Network/File systems/NFS server
+## Description:         Avoid DNS lookups for kerberos principal
+## Type:                yesno
+## Default:             no
+## ServiceRestart:      gssd
+#
+# Avoid DNS lookups when determining kerberos identity
+# of NFS server (yes/no)
+# "yes" is safest, but "no" might be needed to preserve
+# correct behaviour at sites that don't use
+# Fully Qualified Domain Names when mounting NFS Shares.
+#
+NFS_GSSD_AVOID_DNS="no"

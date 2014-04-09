@@ -10,8 +10,6 @@ define nfs::mount (
   $pass     = undef,
 ) {
 
-  require 'nfs'
-
   $mountpoint        = $name
   $ensure_mountpoint = $ensure ? {
     'absent' => $ensure,

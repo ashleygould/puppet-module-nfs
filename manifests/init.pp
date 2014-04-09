@@ -1,19 +1,17 @@
-# == Class: nfs
+# = Class: nfs
 #
 # Manages NFS
 #
 class nfs (
-  $supporting_class      = $nfs::params::supporting_class,
-  $client_package        = $nfs::params::client_package,
-  $client_service        = $nfs::params::client_service,
-  $server_package        = $nfs::params::server_package,
-  $server_service        = $nfs::params::server_service,
-  $client_service_ensure = $nfs::params::client_service_ensure,
-  $client_service_enable = true,
-  $hiera_hash            = false,
-  $mounts                = undef,
+  $ensure     = $nfs::params::client_service_ensure,
+  $enable     = true,
+  $hiera_hash = false,
+  $mounts     = undef,
 ) inherits nfs::params {
 
+  $supporting_class = $nfs::params::supporting_class
+  $client_package   = $nfs::params::client_package
+  $client_service   = $nfs::params::client_service
 
   # include required supporting classes
   if $supporting_class != undef {
@@ -39,7 +37,7 @@ class nfs (
   # manage client service
   if $client_service {
     service { 'nfs_client_service':
-      ensure    => $client_service_ensure,
+      ensure    => $ensure,
       name      => $client_service,
       enable    => $enable,
       subscribe => Package[$client_package],

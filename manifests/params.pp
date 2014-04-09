@@ -10,14 +10,16 @@ class nfs::params {
       $client_service_ensure = 'running'
       $client_package    = 'nfs-common'
       $server_package    = undef
-      $server_service    = undef
+      $nfslock_service   = undef
 
       case $::lsbdistid {
         'Debian': {
           $client_service = 'nfs-common'
+          $server_service = 'nfs-common'
         }
         'Ubuntu': {
           $client_service = undef
+          $server_service = undef
         }
         default: {
           fail("nfs module only supports lsbdistid Debian and Ubuntu of osfamily Debian. Detected lsbdistid is <${::lsbdistid}>.")
@@ -29,8 +31,9 @@ class nfs::params {
       $client_service_ensure = 'running'
       $client_service    = 'nfs'
       $client_package    = 'nfs-utils'
-      $server_service    = undef
+      $server_service    = 'nfs'
       $server_package    = undef
+      $nfslock_service   = 'nfslock'
 
       case $::lsbmajdistrelease {
         '5': {
@@ -49,16 +52,15 @@ class nfs::params {
       $client_service_ensure = undef
       $client_service    = 'nfs'
       $server_service    = 'nfsserver'
+      $nfslock_service   = undef
+      $supporting_class  = ['nfs::idmap', 'rpcbind']
 
       case $::lsbmajdistrelease {
         '10': {
-          $supporting_class   = 'nfs::idmap'
-          #$supporting_class   = ['nfs::idmap', 'portmap']
           $client_package = 'nfs-utils'
           $server_package = undef
         }
         '11': {
-          $supporting_class   = ['nfs::idmap', 'rpcbind']
           $client_package = 'nfs-client'
           $server_package = 'nfs-kernel-server'
         }

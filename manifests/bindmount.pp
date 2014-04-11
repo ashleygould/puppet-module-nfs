@@ -1,7 +1,8 @@
 # = Define: nfs::bindmount
 # Creates a bind mount filesystem
 #
-# === Paramiters:
+# === Parameters:
+# $name::    The resource title - the directory name of the mountpoint.
 # $ensure::  Ensures creation of bind mount filesystem.  Default: 'mounted'.
 # $device::  Fully qualified path to device to be mounted.  Required.
 # $options:: Additional mount options to append.  Optional.

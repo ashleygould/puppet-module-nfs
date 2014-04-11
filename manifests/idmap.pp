@@ -1,6 +1,39 @@
-# == Class: nfs::idmap
+# = Class: nfs::idmap
 #
 # Manages idmapd
+#
+# This class is almost verbatim from ghoneycutt original.
+#
+# === Provides:
+# - install package
+# - manage idmap.conf file
+# - manage idmapd service
+#
+# === Parameters:
+# $idmap_package::		String of the idmap package name.
+# $idmapd_conf_path		The location of the config file.  Default: /etc/idmapd.conf
+# $idmapd_conf_owner::		The owner of the config file.
+# $idmapd_conf_group::		The group for the config file.
+# $idmapd_conf_mode::		The mode for the config file.
+# $idmapd_service_name::	String of the service name.
+# $idmapd_service_enable::	Boolean value of enable parameter for idmapd service.  Default: true
+# $idmapd_service_hasstatus::	Boolean value of hasstatus parameter for idmapd service.  Default: true
+# $idmapd_service_hasrestart::	Boolean value of hasrestart parameter for idmapd service.  Default: true
+#
+# idmapd.conf options:
+# $idmap_domain::	String value of domain to be set as local NFS domain.  Default: $::domain
+# $ldap_server::	String value of ldap server name.
+# $ldap_base::		String value of ldap search base.
+# $local_realms::	String or array of local kerberos realm names.  Default: $::domain
+# $translation_method::	String or array of mapping method to be used between NFS and local IDs.  Valid values is nsswitch, umich_ldap or static.  Default: nsswitch
+# $nobody_user::	String of local user name to be used when a mapping cannot be completed.  Default: nobody
+# $nobody_group::	String of local group name to be used when a mapping cannot be completed.  Default: nobody
+# $verbosity::		Integer of verbosity level.  Default: 0
+# $pipefs_directory::	String of the directory for rpc_pipefs.
+#
+#
+# === Usage:
+#   include nfs::idmap
 #
 class nfs::idmap (
   $idmap_package             = 'USE_DEFAULTS',
@@ -24,6 +57,7 @@ class nfs::idmap (
   $pipefs_directory          = 'USE_DEFAULTS',
 ) {
 
+  # massage and validate parameters
   $is_idmap_domain_valid = is_domain_name($idmap_domain)
   if $is_idmap_domain_valid != true {
     fail("nfs::idmap::idmap_domain parameter, <${idmap_domain}>, is not a valid name.")
@@ -124,10 +158,14 @@ class nfs::idmap (
     validate_absolute_path($pipefs_directory_real)
   }
 
+
+  # install package
   package { $idmap_package_real:
     ensure => present,
   }
 
+
+  # manage idmap.conf file
   file { 'idmapd_conf':
     ensure  => file,
     path    => $idmapd_conf_path,
@@ -138,6 +176,8 @@ class nfs::idmap (
     require => Package[$idmap_package_real],
   }
 
+
+  # manage idmapd service
   if $idmapd_service_name_real != undef {
 
     service { 'idmapd_service':

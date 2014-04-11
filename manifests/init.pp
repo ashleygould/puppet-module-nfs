@@ -1,6 +1,39 @@
 # = Class: nfs
 #
-# Manages NFS
+# Manages NFS Clients
+#
+# === Provides:
+# - install client packages
+# - manage client service
+# - create nfs mounts either from hiera_hash call or from $mounts param
+#
+# === Parameters:
+# $ensure::	Ensure nfs client services are running or not.
+# $enable::	Enable nfs client services to start at boot.
+# $mounts::	Hash of instances of type nfs::mount to be mounted.  Optional.
+# $hiera_hash::	Boolean to use hiera_hash function to merge all found instances of nfs::mounts.
+#
+# === Usage:
+#  include nfs
+#
+#    or
+#
+#  class { nfs:
+#    mounts => {
+#      '/webnfs/www-data' => {
+#        server => 'unxnfst01',
+#        share  => '/nfs-ucop/www-data',
+#        fstype => 'nfs4',
+#        options=> 'rw,hard,intr',
+#      },
+#      '/data/www-data' => {
+#        server => 'unxnfst01',
+#        share  => '/data/nfs-ucop/www-data',
+#        fstype => 'nfs',
+#        options=> 'rw,hard,intr,tcp',
+#      },
+#    } 
+#  }
 #
 class nfs (
   $ensure     = $nfs::params::client_service_ensure,

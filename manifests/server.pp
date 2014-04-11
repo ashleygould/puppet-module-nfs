@@ -15,8 +15,8 @@
 # $mountd_port:: Assign port rpc.mountd listens on.  Optional.
 # $statd_port::  Assign port rpc.statd listens on.  Optional.
 # $lockd_port::  Assign port rpc.lockd listens on.  Optional.
+# $exports::     Hash of instances of type nfs::export to be exported.  Optional.
 # $hiera_hash::  Boolean to use hiera_hash function to merge all found instances of nfs::exports.
-# $exports::     Hash of instances of type nfs::exports to be exported.  Optional.
 #
 # === Usage:
 #  class { nfs::server:

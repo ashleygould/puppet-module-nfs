@@ -1,0 +1,158 @@
+= Module nfs
+Puppet module to manage NFS client and server.
+
+This module is a rewrite of the nfs module by ghoneycutt:
+https://github.com/ghoneycutt/puppet-module-nfs
+
+I also borrowed extensively from the nfs module by haraldsk:
+https://github.com/haraldsk/puppet-module-nfs
+
+===== Notable changes:
+- management of /etc/exports via concat
+- cleaner support of SLES
+- add a params class
+- remove dependancy on modules ghoneycutt/common, ghoneycutt/types
+- drop support for Solaris
+
+===== TODO:
+- update rspec-puppet tests
+- update README.md
+- test against Ubuntu/Debian
+
+.
+
+=== Supported OS:
+- RHEL5 (not tested)
+- RHEL6
+- SLES11
+- SLES10
+- Ubuntu 12 (not tested)
+- Debian 6 (client only - not tested)
+
+=== Dependancies:
+- puppetlabs/stdlib
+- puppetlabs/concat
+- ghoneycutt/rpcbind
+
+.
+
+=== Summery of Classes:
+nfs::params::	Default parameters for nfs classes
+nfs::		Manages NFS Clients
+nfs::server::	Manages an NFS Server
+nfs::idmap::	Manages idmapd
+
+=== Defines:
+nfs::mkdir_p::   Provide `mkdir -p` functionality for a directory
+nfs::mount::     Configure and mount and nfs file share
+nfs::bindmount:: Creates a bind mount filesystem
+nfs::export::    Add a exported filesystem line to /etc/exports using concat
+
+.
+
+== Usage Examples:
+
+===== NFS v4 with hiera:
+
+nodes.pp
+  node 'nfs4-server.blee.edu' {
+    include 'nfs::server'
+    nfs::bindmount { '/exports/nfs-data0': device => '/data0' }
+    nfs::bindmount { '/exports/nfs-data1': device => '/data1' }
+    firewall {"200 nfs::server - nfsd":
+      proto   => 'tcp',
+      state   => ['NEW'],
+      dport   => '2049',
+      action  => 'accept',
+    }
+  }
+  
+  node 'web.blee.edu', 'app.blee.edu' {
+    include 'nfs'
+  }
+
+
+nfs4-server.blee.edu.yaml
+  nfs::server::exports:
+    /exports:
+      clients : '*.blee.edu(fsid=0,sync,no_subtree_check)'
+    /exports/nfs-data0:
+      clients : 'web.blee.edu(rw,sync,no_subtree_check)'
+    /exports/nfs-data1:
+      clients : 'apps.blee.edu(rw,sync,no_subtree_check)'
+
+
+web.blee.edu.yaml
+  nfs::mounts:
+    /webnfs/data:
+      server : nfs4-server.blee.edu
+      share  : /nfs-data0
+      options: rw
+
+apps.blee.edu.yaml
+  nfs::mounts:
+    /appnfs/data:
+      server : nfs4-server.blee.edu
+      share  : /nfs-data1
+      options: rw
+
+
+
+===== NFS v3 with hiera:
+nodes.pp
+  node 'nfs3-server.blee.edu' {
+    include 'nfs::server'
+    firewall {"200 nfs::server - nfsd":
+      proto   => 'tcp',
+      state   => ['NEW'],
+      dport   => '2049',
+      action  => 'accept',
+    }
+    firewall {"201 nfs::server - rpcbind":
+      proto   => 'tcp',
+      state   => ['NEW'],
+      dport   => '111',
+      action  => 'accept',
+    }
+    firewall {"202 nfs::server - nfs v3 rpc services":
+      proto   => 'tcp',
+      state   => ['NEW'],
+      dport   => '4000-4005',
+      action  => 'accept',
+    }
+  }
+  
+  node 'web.blee.edu', 'app.blee.edu' {
+    include 'nfs'
+  }
+
+
+nfs3-server.blee.edu.yaml
+  nfs::server::statd_port:  4001
+  nfs::server::mountd_port: 4002
+  nfs::server::lockd_port:  4003
+  nfs::server::exports:
+    /data0:
+      clients : 'web.blee.edu(rw,sync,no_subtree_check)'
+    /data1:
+      clients : 'apps.blee.edu(rw,sync,no_subtree_check)'
+
+
+web.blee.edu.yaml
+  nfs::mounts:
+    /webnfs/data:
+      server : nfs3-server.blee.edu
+      share  : /data0
+      fstype : nfs
+      options: rw,tcp
+
+apps.blee.edu.yaml
+  nfs::mounts:
+    /appnfs/data:
+      server : nfs3-server.blee.edu
+      share  : /data1
+      fstype : nfs
+      options: rw,tcp
+
+
+

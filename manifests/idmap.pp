@@ -188,5 +188,9 @@ class nfs::idmap (
       hasrestart => $idmapd_service_hasrestart,
       subscribe  => File['idmapd_conf'],
     }
+  } elsif $::osfamily == 'Suse' and $::lsbmajdistrelease == '11' {
+    Service <| title == 'nfs_client_service' |> {
+      subscribe  => File['idmapd_conf'],
+    }
   }
 }
